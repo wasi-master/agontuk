@@ -32,7 +32,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'SolaimanLipi',
+  font-family: 'Baloo Da 2', 'Noto Sans Bengali', 'SolaimanLipi',
                Arial, sans-serif;
   background: #1a1840;   /* dark bg so inter-screen flash is dark, not white */
   color: var(--text);
