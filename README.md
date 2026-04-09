@@ -62,7 +62,3 @@ Then open `http://localhost:8000` in your browser and play.
 
 - **License**: MIT (add a `LICENSE` file to make this explicit).
 - **Attribution**: Inspired by the public "Spy"/"Spyfall" family of social deduction games; this repository contains an original, localized implementation.
-
----
-
-If you'd like, I can also add a short screenshot, translate the README into Bangla, or create a `LICENSE` file.
