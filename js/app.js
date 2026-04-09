@@ -116,6 +116,11 @@ function showScreen(name) {
   }
 }
 
+function returnToConfigScreen() {
+  showScreen('config');
+  renderConfig();
+}
+
 // ─── Config Screen ────────────────────────────────────────────────────────────
 
 function renderConfig() {
@@ -576,8 +581,12 @@ function quickRematch() {
 function newGame() {
   sounds.tap();
   confetti.stop();
-  showScreen('config');
-  renderConfig();
+  returnToConfigScreen();
+}
+
+function cancelReveal() {
+  sounds.tap();
+  returnToConfigScreen();
 }
 
 // ─── Rules Modal ──────────────────────────────────────────────────────────────

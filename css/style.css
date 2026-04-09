@@ -429,10 +429,37 @@ body {
 #screen-reveal {
   background: linear-gradient(160deg, #1a1840 0%, #2d2b6b 100%);
   min-height: 100vh;
+  position: relative;
 }
 #screen-reveal.active {
   display: flex;
   flex-direction: column;
+}
+
+.reveal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,.16);
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  transition: background var(--transition), transform var(--transition);
+  z-index: 3;
+}
+.reveal-close-btn:active {
+  background: rgba(255,255,255,.28);
+  transform: scale(0.94);
 }
 
 .reveal-phase {
