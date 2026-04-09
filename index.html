@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6C63FF">
+  <meta name="description" content="আগন্তুক — বাংলাদেশি স্পাই পার্টি গেম">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <title>আগন্তুক 🕵️</title>
+  <!-- Bengali font (gracefully degrades offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ─── Confetti Canvas ──────────────────────────────────────────────────────── -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!--  SCREEN 1 — Configuration                                                  -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="screen-config" class="screen">
+
+  <div class="config-header">
+    <button class="help-btn" onclick="openRules()" aria-label="খেলার নিয়ম">?</button>
+    <span class="logo-icon">🕵️</span>
+    <h1>আগন্তুক</h1>
+    <p class="config-subtitle">বাংলাদেশি স্পাই পার্টি গেম</p>
+  </div>
+
+  <div class="config-body">
+
+    <!-- Numbers: players / spies / timer -->
+    <div class="config-section">
+      <h3>সংখ্যা নির্বাচন</h3>
+      <div class="stepper-row">
+
+        <div class="stepper-group">
+          <label>খেলোয়াড়</label>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="changeConfig('playerCount',-1)" aria-label="কমান">−</button>
+            <span id="player-count-display">4</span>
+            <button class="stepper-btn" onclick="changeConfig('playerCount', 1)" aria-label="বাড়ান">+</button>
+          </div>
+        </div>
+
+        <div class="stepper-group">
+          <label>আগন্তুক</label>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="changeConfig('spyCount',-1)" aria-label="কমান">−</button>
+            <span id="spy-count-display">1</span>
+            <button class="stepper-btn" onclick="changeConfig('spyCount', 1)" aria-label="বাড়ান">+</button>
+          </div>
+        </div>
+
+        <div class="stepper-group">
+          <label>সময় (মি.)</label>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="changeConfig('timerMinutes',-1)" aria-label="কমান">−</button>
+            <span id="timer-minutes-display">4</span>
+            <button class="stepper-btn" onclick="changeConfig('timerMinutes', 1)" aria-label="বাড়ান">+</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Category Selection -->
+    <div class="config-section">
+      <div class="section-header">
+        <h3>ক্যাটাগরি</h3>
+        <button class="btn-text" onclick="openCustomCategories()">+ কাস্টম</button>
+      </div>
+      <div id="categories-grid" class="categories-grid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Player Names (collapsible) -->
+    <div class="config-section">
+      <button class="collapsible-header" onclick="togglePlayerNames()" aria-expanded="false">
+        <h3>খেলোয়াড়ের নাম</h3>
+        <span id="names-toggle-icon" aria-hidden="true">▼</span>
+      </button>
+      <div id="player-names-container" class="collapsed">
+        <div id="player-names-list" class="player-names-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Sound Toggle -->
+    <div class="config-section">
+      <div class="toggle-row">
+        <span>🔊 সাউন্ড</span>
+        <label class="toggle">
+          <input type="checkbox" id="sound-toggle" checked onchange="toggleSound()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Start Game -->
+    <button id="start-btn" class="btn-primary btn-large" onclick="startGame()">
+      খেলা শুরু করুন
+    </button>
+
+  </div><!-- /config-body -->
+</div><!-- /screen-config -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!--  SCREEN 2 — Card Reveal (Pass-and-Play)                                    -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="screen-reveal" class="screen">
+
+  <!-- Phase A: Pass Device -->
+  <div id="reveal-pass-device" class="reveal-phase">
+    <div class="reveal-pass-container">
+
+      <div class="pass-device-emoji">📱</div>
+      <h2>ডিভাইসটি যাকে দিবেনঃ</h2>
+
+      <div id="pass-to-player" class="pass-to-player">
+        <!-- Populated by JS: badge + name -->
+      </div>
+
+      <p class="pass-instruction">শুধুমাত্র তুমি তোমার কার্ড দেখো।<br>অন্যদের দেখাবে না!<br>দেখা শেষে আবার স্পর্শ করে লুকিয়ে ফেলো</p>
+      <p id="reveal-progress-pass" class="pass-progress">১ / ৪</p>
+
+      <div class="reveal-pass-bottom">
+        <button class="btn-primary btn-large" onclick="readyToReveal()">
+          আমি প্রস্তুত
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Phase B: Card Interaction -->
+  <div id="reveal-card" class="reveal-phase">
+    <div class="reveal-card-container">
+
+      <!-- Top bar -->
+      <div class="reveal-top-bar">
+        <span id="reveal-progress" class="reveal-progress-badge">১ / ৪</span>
+        <span id="reveal-player-name" class="reveal-player-label">খেলোয়াড় ১</span>
+        <span style="width:40px;"></span><!-- spacer for symmetry -->
+      </div>
+
+      <!-- The card -->
+      <div class="card-scene">
+        <div class="card-wrapper">
+          <div id="game-card" class="card" onclick="handleCardTap()" role="button" aria-label="কার্ড উল্টান">
+
+            <!-- Front (face-down: mystery) -->
+            <div class="card-face card-front">
+              <div class="card-front-inner">
+                <span class="card-front-logo">🕵️</span>
+                <p>স্পর্শ করুন</p>
+              </div>
+            </div>
+
+            <!-- Back (face-up: role) -->
+            <div id="card-back" class="card-face card-back">
+              <div id="card-back-content" class="card-role">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="card-instruction" class="card-instruction">কার্ডটি স্পর্শ করুন</div>
+      </div>
+
+      <!-- Next button (hidden until card is re-flipped) -->
+      <div id="reveal-next-btn-area" class="reveal-action-area hidden">
+        <button id="reveal-next-btn" class="btn-primary btn-large" onclick="nextReveal()">
+          পরবর্তী →
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /screen-reveal -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!--  SCREEN 3 — Game Phase (Timer)                                             -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="game-content">
+
+    <h2 class="game-title">খেলা চলছে</h2>
+
+    <!-- Circular countdown timer -->
+    <div class="timer-wrapper">
+      <svg class="timer-svg" viewBox="0 0 120 120">
+        <circle class="timer-ring-bg" cx="60" cy="60" r="54"/>
+        <circle id="timer-ring-progress" class="timer-ring-progress" cx="60" cy="60" r="54"/>
+      </svg>
+      <div id="timer-display" class="timer-display">04:00</div>
+    </div>
+
+    <p class="game-instruction">
+      আলোচনা করুন এবং আগন্তুককে খুঁজে বের করুন!
+    </p>
+
+    <button class="btn-danger btn-large" onclick="endGame()">
+      খেলা শেষ করুন
+    </button>
+
+  </div>
+</div><!-- /screen-game -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!--  SCREEN 4 — End Game / Results                                             -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="screen-end" class="screen">
+
+  <div class="end-header">
+    <h1>🎉 খেলা শেষ!</h1>
+    <p class="end-subtitle">আগন্তুক কি ধরা পড়েছে?</p>
+  </div>
+
+  <div class="result-card">
+
+    <div class="result-item">
+      <span class="result-label">গোপন বিষয়</span>
+      <span id="result-secret" class="result-value result-secret">—</span>
+    </div>
+
+    <div class="result-item">
+      <span class="result-label">ক্যাটাগরি</span>
+      <span id="result-category" class="result-value">—</span>
+    </div>
+
+    <div class="result-item">
+      <span class="result-label">আগন্তুক ছিলেন</span>
+      <div id="result-spies" class="result-spies">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <div class="end-actions">
+    <button class="btn-primary btn-large" onclick="quickRematch()">আবার খেলুন</button>
+    <button class="btn-secondary btn-large" onclick="newGame()">নতুন ম্যাচ</button>
+  </div>
+
+</div><!-- /screen-end -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!--  MODAL — Custom Categories List                                            -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="modal-custom" class="modal" role="dialog" aria-modal="true" aria-label="কাস্টম ক্যাটাগরি">
+  <div class="modal-sheet">
+
+    <div class="modal-header">
+      <h2>কাস্টম ক্যাটাগরি</h2>
+      <button class="modal-close" onclick="closeCustomCategories()" aria-label="বন্ধ করুন">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div id="custom-categories-list">
+        <!-- Populated by JS -->
+      </div>
+      <button class="btn-primary btn-large" onclick="addCustomCategory()">
+        + নতুন ক্যাটাগরি
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!--  MODAL — Edit / Add Custom Category                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="modal-edit-category" class="modal" role="dialog" aria-modal="true" aria-label="ক্যাটাগরি সম্পাদনা">
+  <div class="modal-sheet">
+
+    <div class="modal-header">
+      <h2 id="edit-category-title">নতুন ক্যাটাগরি</h2>
+      <button class="modal-close" onclick="closeEditCategory()" aria-label="বন্ধ করুন">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label>ক্যাটাগরির আইকন (ইমোজি)</label>
+        <div class="emoji-picker-row">
+          <div id="emoji-preview" class="emoji-preview">📋</div>
+          <div class="emoji-grid" id="emoji-grid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+        <input
+          type="text"
+          id="edit-category-emoji"
+          placeholder="নিজে লিখুন…"
+          maxlength="4"
+          autocomplete="off"
+          oninput="setCustomEmoji(this.value)"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="edit-category-name">ক্যাটাগরির নাম</label>
+        <input
+          type="text"
+          id="edit-category-name"
+          placeholder="যেমন: আমার প্রিয় খাবার"
+          maxlength="40"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="edit-category-items">আইটেমসমূহ (কমা দিয়ে আলাদা করুন)</label>
+        <textarea
+          id="edit-category-items"
+          placeholder="পিৎজা, বার্গার, ফুচকা, চটপটি..."
+          rows="5"
+          oninput="updateEditItemsCount()"
+        ></textarea>
+        <small id="edit-items-count">০টি আইটেম</small>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-secondary" onclick="closeEditCategory()">বাতিল</button>
+        <button class="btn-primary" onclick="saveCustomCategory()">সংরক্ষণ ✓</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/categories.js"></script>
+<script src="js/sounds.js"></script>
+<script src="js/confetti.js"></script>
+<script src="js/app.js"></script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!--  MODAL — Game Rules                                                         -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div id="modal-rules" class="modal" role="dialog" aria-modal="true" aria-label="খেলার নিয়ম">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <h2>খেলার নিয়ম</h2>
+      <button class="modal-close" onclick="closeRules()" aria-label="বন্ধ করুন">✕</button>
+    </div>
+    <div class="modal-body rules-body">
+
+      <div class="rules-section">
+        <div class="rules-icon">🕵️</div>
+        <h3>লক্ষ্য</h3>
+        <p>বেশিরভাগ খেলোয়াড় একটি গোপন বিষয় জানেন। একজন বা একাধিক <strong>আগন্তুক</strong> এই বিষয় জানেন না — তারা সেটা লুকানোর চেষ্টা করে!</p>
+      </div>
+
+      <div class="rules-section">
+        <div class="rules-icon">🃏</div>
+        <h3>কার্ড বিতরণ</h3>
+        <p>ডিভাইসটি একে একে সবাইকে দিন। প্রত্যেকজন নিজের কার্ড দেখে লুকিয়ে নিন। আগন্তুকের কার্ডে গোপন বিষয়ের বদলে লেখা থাকে "আপনিই আগন্তুক!"</p>
+      </div>
+
+      <div class="rules-section">
+        <div class="rules-icon">💬</div>
+        <h3>আলোচনা পর্ব</h3>
+        <p>টাইমার চালু হলে সবাই প্রশ্ন-উত্তর করুন। আগন্তুক চেষ্টা করবে সন্দেহ এড়াতে। বাকিরা চেষ্টা করবে আগন্তুককে শনাক্ত করতে।</p>
+      </div>
+
+      <div class="rules-section">
+        <div class="rules-icon">🗳️</div>
+        <h3>ভোটাভুটি</h3>
+        <p>সময় শেষে সবাই মিলে আগন্তুক কে তা নিয়ে ভোট দিন। আগন্তুক ধরা পড়লে সে শেষ চেষ্টায় গোপন বিষয় অনুমান করতে পারে — সঠিক হলে সে জিতে যায়!</p>
+      </div>
+
+      <div class="rules-section">
+        <div class="rules-icon">🏆</div>
+        <h3>কে জেতে?</h3>
+        <ul>
+          <li>আগন্তুক শনাক্ত না হলে — আগন্তুক জেতে।</li>
+          <li>আগন্তুক শনাক্ত হলে কিন্তু গোপন বিষয় ঠিকঠাক অনুমান করে — আগন্তুক জেতে।</li>
+          <li>বাকি সব ক্ষেত্রে — দল জেতে।</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

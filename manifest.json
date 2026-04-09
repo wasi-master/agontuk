@@ -1,0 +1,21 @@
+{
+  "name": "আগন্তুক",
+  "short_name": "আগন্তুক",
+  "description": "বাংলাদেশি স্পাই পার্টি গেম — পাস-অ্যান্ড-প্লে",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1840",
+  "theme_color": "#6C63FF",
+  "lang": "bn",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["games", "entertainment"]
+}
