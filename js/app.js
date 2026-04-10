@@ -291,14 +291,15 @@ function getAllCategories() {
 }
 
 function toggleCategory(key, btn) {
-  sounds.tap();
   const idx = state.config.selectedCategories.indexOf(key);
   if (idx >= 0) {
     state.config.selectedCategories.splice(idx, 1);
     btn.classList.remove('selected');
+    sounds.categoryDeselect();
   } else {
     state.config.selectedCategories.push(key);
     btn.classList.add('selected');
+    sounds.categorySelect();
   }
   saveConfig();
 }

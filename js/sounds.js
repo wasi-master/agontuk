@@ -86,6 +86,18 @@ class SoundEffects {
       this._tone(freq, 0.25, 'sine', 0.2, i * 0.1);
     });
   }
+
+  /** Category selected (pleasant ascending chime) */
+  categorySelect() {
+    this._tone(900, 0.08, 'sine', 0.16);
+    this._tone(1200, 0.10, 'sine', 0.14, 0.06);
+  }
+
+  /** Category deselected (subtle lower tap) */
+  categoryDeselect() {
+    this._tone(440, 0.07, 'triangle', 0.14);
+    this._tone(360, 0.06, 'triangle', 0.10, 0.05);
+  }
 }
 
 const sounds = new SoundEffects();
