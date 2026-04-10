@@ -1104,6 +1104,10 @@ body {
   max-width: 90vw;
   text-align: center;
 }
+#toast.warning {
+  background: linear-gradient(135deg, var(--warning) 0%, var(--danger) 100%);
+  box-shadow: 0 6px 24px rgba(255, 71, 87, .32);
+}
 #toast.show {
   transform: translateX(-50%) translateY(0);
   opacity: 1;

@@ -132,10 +132,43 @@ function renderConfig() {
   buildPlayerNameFields();
 }
 
-function changeConfig(key, delta) {
-  sounds.tap();
+function getConfigLimitMessage(key, delta) {
   if (key === 'playerCount') {
-    state.config.playerCount = Math.max(3, Math.min(12, state.config.playerCount + delta));
+    return delta > 0
+      ? 'খেলোয়াড়ের সংখ্যা সর্বোচ্চ ১২'
+      : 'খেলোয়াড়ের সংখ্যা সর্বনিম্ন ৩';
+  }
+
+  if (key === 'spyCount') {
+    const maxSpies = Math.floor(state.config.playerCount / 2);
+    return delta > 0
+      ? `স্পাইয়ের সংখ্যা সর্বোচ্চ ${maxSpies}`
+      : 'স্পাইয়ের সংখ্যা সর্বনিম্ন ১';
+  }
+
+  if (key === 'timerMinutes') {
+    return delta > 0
+      ? 'টাইমার সর্বোচ্চ ২০ মিনিট'
+      : 'টাইমার সর্বনিম্ন ১ মিনিট';
+  }
+
+  return 'মান পরিবর্তন করা যায়নি';
+}
+
+function showConfigLimitFeedback(key, delta) {
+  sounds.limit();
+  showToast(getConfigLimitMessage(key, delta), 'warning');
+}
+
+function changeConfig(key, delta) {
+  if (key === 'playerCount') {
+    const nextValue = Math.max(3, Math.min(12, state.config.playerCount + delta));
+    if (nextValue === state.config.playerCount) {
+      showConfigLimitFeedback(key, delta);
+      return;
+    }
+
+    state.config.playerCount = nextValue;
     // Ensure spy count stays valid
     const maxSpies = Math.floor(state.config.playerCount / 2);
     state.config.spyCount = Math.min(state.config.spyCount, maxSpies);
@@ -144,12 +177,26 @@ function changeConfig(key, delta) {
     buildPlayerNameFields();
   } else if (key === 'spyCount') {
     const maxSpies = Math.floor(state.config.playerCount / 2);
-    state.config.spyCount = Math.max(1, Math.min(maxSpies, state.config.spyCount + delta));
+    const nextValue = Math.max(1, Math.min(maxSpies, state.config.spyCount + delta));
+    if (nextValue === state.config.spyCount) {
+      showConfigLimitFeedback(key, delta);
+      return;
+    }
+
+    state.config.spyCount = nextValue;
     document.getElementById('spy-count-display').textContent = state.config.spyCount;
   } else if (key === 'timerMinutes') {
-    state.config.timerMinutes = Math.max(1, Math.min(20, state.config.timerMinutes + delta));
+    const nextValue = Math.max(1, Math.min(20, state.config.timerMinutes + delta));
+    if (nextValue === state.config.timerMinutes) {
+      showConfigLimitFeedback(key, delta);
+      return;
+    }
+
+    state.config.timerMinutes = nextValue;
     document.getElementById('timer-minutes-display').textContent = state.config.timerMinutes;
   }
+
+  sounds.tap();
   saveConfig();
 }
 
@@ -760,16 +807,20 @@ function setCustomEmoji(val) {
 
 // ─── Toast Notification ───────────────────────────────────────────────────────
 
-function showToast(message) {
+let toastHideTimeout = null;
+
+function showToast(message, variant = '') {
   let toast = document.getElementById('toast');
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'toast';
     document.body.appendChild(toast);
   }
+  toast.className = variant || '';
   toast.textContent = message;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2800);
+  if (toastHideTimeout) clearTimeout(toastHideTimeout);
+  toastHideTimeout = setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────

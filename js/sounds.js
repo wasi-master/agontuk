@@ -66,6 +66,12 @@ class SoundEffects {
     this._tone(1400, 0.06, 'square', 0.12);
   }
 
+  /** Boundary / invalid adjustment */
+  limit() {
+    this._tone(220, 0.08, 'square', 0.16);
+    this._tone(160, 0.12, 'triangle', 0.12, 0.08);
+  }
+
   /** End game fanfare */
   endGame() {
     const notes = [523, 659, 784, 1047, 784, 1047];
